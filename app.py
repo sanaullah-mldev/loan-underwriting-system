@@ -8,16 +8,10 @@ import streamlit as st
 # Page configuration
 st.set_page_config(page_title="Loan Underwriting Portal", layout="wide")
 
-# Paths to saved pipeline and SQLite database
+# Use relative paths so app works on both local machine and Streamlit Cloud
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "loan_underwriting_pipeline.joblib")
 DB_PATH = os.path.join(BASE_DIR, "loan_underwriting.db")
-
-# Simple role-based login credentials (Clerk / Manager)
-USERS = {
-    "admin": "loan123",
-    "clerk1": "bank2026"
-}
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -57,12 +51,13 @@ def login_screen():
         password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Login")
         if submitted:
-            if username in USERS and USERS[username] == password:
+            # Accept any non-empty username and password
+            if username.strip() and password.strip():
                 st.session_state["authenticated"] = True
-                st.session_state["current_user"] = username
+                st.session_state["current_user"] = username.strip()
                 st.rerun()
             else:
-                st.error("Invalid username or password.")
+                st.error("Please enter both username and password.")
 
 def main_portal():
     col_title, col_logout = st.columns([5, 1])
